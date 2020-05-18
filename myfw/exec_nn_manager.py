@@ -1,12 +1,12 @@
 import argparse
-
+# ----
 from myfw.create_nn_manager import create_nn_manager
 
 def set_custom_params(args):
 
     args.framework_type = 'chainer'
     # args.framework_type = 'pytorch'
-
+    
     # args.model_framework_type = 'chainer'
     args.model_framework_type = 'pytorch'
 
@@ -18,6 +18,8 @@ def set_custom_params(args):
 
     # args.eval_interval = 5
     args.eval_interval = 1
+
+    args.lazy = True
 
     pass
 
@@ -39,6 +41,7 @@ def set_params():
     parser.add_argument('--retain-num', type=int, default=1, help='retain num')
     parser.add_argument('--resume_filename', type=str, help='resume filename')
     parser.add_argument('--call-before-training', action='store_true', help='call before training')
+    parser.add_argument('--lazy', action='store_true', help='lazy')
     args = parser.parse_args()
    
     set_custom_params(args)

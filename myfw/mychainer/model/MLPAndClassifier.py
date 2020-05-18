@@ -1,8 +1,7 @@
-# import
 import chainer
 import chainer.links as L
 import chainer.functions as F
-
+# ----
 from myfw.mychainer.model.MLP import MLP
 
 class MLPAndClassifier(MLP):

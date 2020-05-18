@@ -1,11 +1,18 @@
-# import
 import chainer
 from chainer import iterators
 from chainer import optimizers
 from chainer import training
 from chainer.training import extensions
+from chainer.dataset import convert
+
+import chainer_pytorch_migration as cpm
+# ----
+# import torch
+import torch.nn.functional as torchF
+# from torch.utils.data import DataLoader
 # ----
 from myfw.base_nn_manager import base_nn_manager
+from myfw.mychainer.TorchStandardUpdater import TorchStandardUpdater, tensor_converter
 
 class fw_nn_manager(base_nn_manager):
     def __init__(self):
@@ -14,22 +21,17 @@ class fw_nn_manager(base_nn_manager):
         self.out_model = 'models_chainer'
 
     def set_param(self):
-        if self.model_framework_type == 'pytorch': 
-
-            # import torch
+        if self.model_framework_type == 'chainer': 
+            self.device = chainer.get_device(self.device)
+        elif self.model_framework_type == 'pytorch': 
             # if self.device >= 0:
-            #     self.pytorch_device = 'cuda'
+            #     self.device = 'cuda'
             # else:
-            #     self.pytorch_device = 'cpu'
-            # self.pytorch_device = torch.device(self.pytorch_device)
-            self.pytorch_device = self.device
-
-        elif self.model_framework_type == 'chainer': 
+            #     self.device = 'cpu'
+            # self.device = torch.device(self.device)
             pass
         else:
             raise ValueError
-
-        self.device = chainer.get_device(self.device)
 
         if self.retain_num is None:
             self.retain_num = -1
@@ -44,7 +46,6 @@ class fw_nn_manager(base_nn_manager):
         self.train_loader = iterators.SerialIterator(self.train_dataset, self.batch_size)
         self.valid_loader = iterators.SerialIterator(self.valid_dataset, self.batch_size, repeat=False, shuffle=False)
         # elif self.model_framework_type == 'pytorch': 
-        #     from torch.utils.data import DataLoader
         #     self.train_loader = DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
         #     self.valid_loader = DataLoader(self.valid_dataset, batch_size=self.batch_size, shuffle=False)
         # else:
@@ -60,11 +61,9 @@ class fw_nn_manager(base_nn_manager):
 
         elif self.model_framework_type == 'pytorch': 
 
-            import chainer_pytorch_migration as cpm
             self.model.cuda()
             self.model = cpm.TorchModule(self.model)
-            self.model.to_gpu(self.pytorch_device)
-            # self.model.to_gpu(self.device)
+            self.model.to_gpu(self.device)
 
         else:
             raise ValueError
@@ -82,8 +81,8 @@ class fw_nn_manager(base_nn_manager):
         if self.model_framework_type == 'chainer': 
             updater = training.updaters.StandardUpdater(self.train_loader, self.optimizer, device=self.device)
         elif self.model_framework_type == 'pytorch':
-            from myfw.mychainer.PyTorchStandardUpdater import PyTorchStandardUpdater
-            updater = PyTorchStandardUpdater(self.train_loader, self.optimizer, device=self.device)
+            # updater = TorchStandardUpdater(self.train_loader, self.optimizer, device=self.device)
+            updater = TorchStandardUpdater(self.train_loader, self.optimizer, converter=tensor_converter, device=self.device, loss_func=torchF.nll_loss)
         else:
             raise ValueError
 
@@ -92,8 +91,16 @@ class fw_nn_manager(base_nn_manager):
     # event handler
     def set_event_handler(self):
 
+        if self.model_framework_type == 'chainer':
+            converter=convert.concat_examples
+            eval_func = None
+        elif self.model_framework_type == 'pytorch':
+            converter=tensor_converter
+            eval_func = torchF.nll_loss
+        else:
+            raise ValueError
         # (Not Implemented)Evaluator(train)
-        self.trainer.extend(extensions.Evaluator(self.valid_loader, self.model, device=self.device), trigger=(self.eval_interval, 'epoch'), call_before_training=self.call_before_training)
+        self.trainer.extend(extensions.Evaluator(self.valid_loader, self.model, converter=converter, device=self.device, eval_func=eval_func), trigger=(self.eval_interval, 'epoch'), call_before_training=self.call_before_training)
 
         self.trainer.extend(extensions.ProgressBar())
 
@@ -113,7 +120,12 @@ class fw_nn_manager(base_nn_manager):
         # (Not Implemented)StepShift
         # (Not Implemented)WarmupShift
 
-        self.trainer.extend(extensions.ParameterStatistics(self.model, trigger=(self.eval_interval, 'epoch')))
+        if self.model_framework_type == 'chainer':
+            self.trainer.extend(extensions.ParameterStatistics(self.model, trigger=(self.eval_interval, 'epoch')))
+        elif self.model_framework_type == 'pytorch':
+            pass # エラー回避
+        else:
+            raise ValueError
 
         self.trainer.extend(extensions.VariableStatisticsPlot(self.model))
 
@@ -124,9 +136,9 @@ class fw_nn_manager(base_nn_manager):
 
         self.trainer.extend(extensions.snapshot(n_retains=self.retain_num), trigger=(self.log_interval, 'epoch'))
 
-        self.trainer.extend(extensions.DumpGraph('main/loss'))
-
-        # (Note Implemented) unchain_variables
+        if self.model_framework_type == 'chainer':
+            self.trainer.extend(extensions.DumpGraph('main/loss'))
+            # (Not Implemented) unchain_variables
 
     def resume(self):
         if self.resume_filepath is not None:

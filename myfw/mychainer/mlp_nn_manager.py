@@ -1,6 +1,10 @@
+import chainer.links as L
 from chainer.datasets import mnist
 # ----
 from myfw.mychainer.fw_nn_manager import fw_nn_manager
+from myfw.mychainer.model.MLP import MLP as MLP
+# ----
+from myfw.mytorch.model.MLP import MLP as torchMLP
 
 class mlp_nn_manager(fw_nn_manager):
 
@@ -16,15 +20,12 @@ class mlp_nn_manager(fw_nn_manager):
     def set_model(self):
         if self.model_framework_type == 'chainer':
 
-            import chainer.links as L
-            from myfw.mychainer.model.MLP import MLP
             model = MLP()
             self.model = L.Classifier(model)
 
         elif self.model_framework_type == 'pytorch':
 
-            from myfw.mypytorch.model.MLP import MLP
-            self.model = MLP()
+            self.model = torchMLP()
 
         else:
             raise ValueError

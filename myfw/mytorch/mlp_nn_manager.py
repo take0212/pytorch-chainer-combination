@@ -1,8 +1,11 @@
-# import
 from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
 # ----
-from myfw.mypytorch.fw_nn_manager import fw_nn_manager
+from myfw.mytorch.fw_nn_manager import fw_nn_manager
+from myfw.mytorch.model.MLP import MLP as MLP
+# ----
+from myfw.mychainer.model.MLP import MLP as chainerMLP
+# from myfw.mychainer.model.MLPAndClassifier import chainerMLPAndClassifier
 
 class mlp_nn_manager(fw_nn_manager):
 
@@ -23,13 +26,12 @@ class mlp_nn_manager(fw_nn_manager):
 
         if self.model_framework_type == 'pytorch':
 
-            from myfw.mypytorch.model.MLP import MLP
             self.model = MLP()
 
         elif self.model_framework_type == 'chainer':
 
-            from myfw.mychainer.model.MLPAndClassifier import MLPAndClassifier
-            self.model = MLPAndClassifier()
+            # self.model = chainerMLPAndClassifier()
+            self.model = chainerMLP()
  
             self.input_size = (28 * 28,)
 
