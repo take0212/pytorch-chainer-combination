@@ -1,14 +1,14 @@
 import argparse
 # ----
-from myfw.create_nn_manager import create_nn_manager
+from fw.create_trainer import create_trainer
 
 def set_custom_params(args):
 
-    args.framework_type = 'chainer'
-    # args.framework_type = 'pytorch'
+    # args.trainer_framework_type = 'chainer'
+    args.trainer_framework_type = 'pytorch'
     
-    # args.model_framework_type = 'chainer'
-    args.model_framework_type = 'pytorch'
+    args.model_framework_type = 'chainer'
+    # args.model_framework_type = 'pytorch'
 
     # args.max_epochs = 20
     args.max_epochs = 3
@@ -27,7 +27,7 @@ def set_params():
 
     # parameter
     parser = argparse.ArgumentParser(description='example')
-    parser.add_argument("--framework-type", type=str, default='pytorch', help='framework type')
+    parser.add_argument("--trainer-framework-type", type=str, default='pytorch', help='framework type')
     parser.add_argument("--model-framework-type", type=str, default='pytorch', help='model framework type')
     parser.add_argument("--dataset", type=str, default='mnist', help='dataset')
     parser.add_argument('--device', type=int, default=0, help='GPU ID')
@@ -52,11 +52,11 @@ def main():
     # parameter
     args = set_params()
 
-    # nn_manager
-    nn_manager = create_nn_manager(args)
+    # trainer
+    trainer = create_trainer(args)
 
     # train
-    nn_manager.train()
+    trainer.train()
 
 if __name__ == '__main__':
     main()

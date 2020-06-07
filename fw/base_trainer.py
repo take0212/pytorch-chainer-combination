@@ -1,9 +1,9 @@
 import os
 
-class base_nn_manager():
+class base_trainer():
     def __init__(self):
 
-        self.framework_type = None
+        self.trainer_framework_type = None
         self.model_framework_type = None
         self.dataset = None
         self.device = None
@@ -17,8 +17,7 @@ class base_nn_manager():
         self.retain_num = None
         self.resume_filename = None
         self.call_before_training = None
-        
-        self.resume_filepath = None
+        self.lazy = None
 
         # ----
 
@@ -27,11 +26,13 @@ class base_nn_manager():
         self.train_loader = None
         self.valid_loader = None
 
-        self.model = None  
+        self.model = None
         self.optimizer = None
         self.trainer = None
 
-        self.input_size = None
+        self.out = '..\\result'
+
+        self.resume_filepath = None
 
     def set_args(self, args):
         for name, val in vars(args).items():
@@ -39,7 +40,11 @@ class base_nn_manager():
 
     def set_param(self):
         if self.resume_filename is not None:
-            self.resume_filepath  = os.path.join(self.out_model, self.resume_filename)
+            self.resume_filepath  = os.path.join(self.out, self.resume_filename)
+
+    #device
+    def set_device(self):
+        raise NotImplementedError
 
     # Dataset
     def set_dataset(self):
@@ -75,6 +80,7 @@ class base_nn_manager():
 
     def train(self):
         self.set_param()
+        self.set_device()
         self.set_dataset()
         self.set_dataloader()
         self.set_model()

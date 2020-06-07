@@ -1,17 +1,31 @@
-# pytorch-chainer-combination
-Combined pytorch model / trainer and chainer model / trainer to practice the migration.
+# PyTorch-Chainer-combination
 
-1.Edit framework of trainer and model.
+I combined PyTorch or Chainer trainer and PyTorch or Chainer model to practice the migration.
 
-exec_nn_manager.py
+## Samples
+
+There are 4 samples.
+
+- Run PyTorch trainer with PyTorch model (typical)
+- Run PyTorch trainer with Chainer model (combination)
+- Run Chainer trainer with Chainer model (typical)
+- Run Chainer trainer with PyTorch model (combination)
+
+## Execution procedure
+
+1.Select framework for trainer and model.
+
+Edit exec_trainer.py.
 
 ```
-# args.framework_type = 'chainer'
-args.framework_type = 'pytorch'
+args.trainer_framework_type = 'pytorch'
+# args.trainer_framework_type = 'chainer'
 
-args.model_framework_type = 'chainer'
-# args.model_framework_type = 'pytorch'
+args.model_framework_type = 'pytorch'
+# args.model_framework_type = 'chainer'
 ```
 
-2.Execute exec_nn_manager.py.
+2.Run exec_trainer.py.
+
+Thank you for your cooperation, Emcastillo of Preferred Networks, Inc.
 

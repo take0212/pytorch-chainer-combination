@@ -24,4 +24,3 @@ class MLP(nn.Module):
         h2 = F.relu(self.l2(h1))
         h3 = self.l3(h2)
         return F.log_softmax(h3, dim=1)
-
