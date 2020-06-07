@@ -27,5 +27,6 @@ args.model_framework_type = 'pytorch'
 
 2.Run exec_trainer.py.
 
-Thank you for your cooperation, Emcastillo of Preferred Networks, Inc.
+## Acknowledgments
 
+I would like to thank Emcastillo of Preferred Networks, Inc.
